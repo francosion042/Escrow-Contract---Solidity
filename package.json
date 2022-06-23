@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "commit": "cz",
+    "lint": "eslint --fix --ext .js ."
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
@@ -8,6 +12,7 @@
     "hardhat": "^2.9.9"
   },
   "dependencies": {
-    "@openzeppelin/contracts-upgradeable": "^4.6.0"
+    "@openzeppelin/contracts-upgradeable": "^4.6.0",
+    "@openzeppelin/hardhat-upgrades": "^1.19.0"
   }
 }
