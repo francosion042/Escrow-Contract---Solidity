@@ -1,6 +1,7 @@
 {
   "scripts": {
     "commit": "cz",
+    "test": "npx hardhat test",
     "lint": "eslint --fix --ext .js ."
   },
   "devDependencies": {
@@ -12,6 +13,7 @@
     "hardhat": "^2.9.9"
   },
   "dependencies": {
+    "@nomiclabs/hardhat-etherscan": "^3.1.0",
     "@openzeppelin/contracts-upgradeable": "^4.6.0",
     "@openzeppelin/hardhat-upgrades": "^1.19.0"
   }
