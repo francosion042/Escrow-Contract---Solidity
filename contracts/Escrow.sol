@@ -15,6 +15,30 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
  contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     enum State {NOT_SIGNED, AWAITING_PAYMENT, AWAITING_CONFIRMATION, COMPLETED, CANCELLED}
 
+    // Events
+    event AgreementInitated(
+            uint256 indexed agreementId, 
+            address indexed initiator, 
+            address indexed partner,
+            uint256 agreementAmount,
+            uint256 maxFulfilmentDays
+        );
+    event AgreementSigned(
+            uint256 indexed agreementId,
+            address indexed partner
+        );
+
+    event AgreementAmountDeposited(
+            uint256 indexed agreementId,
+            uint256 agreementAmount,
+            address indexed partner
+        );
+
+    event AgreementTransactionConfirmed(
+            uint256 indexed agreementId,
+            address indexed partner
+        );
+
     // Structs
     struct Agreement {
         address initiator;
@@ -29,18 +53,20 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
     uint256 count = 0;
     mapping (uint256 => Agreement) public agreements;
 
-    // modifiers
+    // Modifiers
     modifier onlyPartner (uint256 _agreementId) {
         require(msg.sender == agreements[_agreementId].partner, "Only the partner can call this function");
         _;
     }
+
+    // Functions
     function initialize () public initializer {
         __Ownable_init();
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-    function initiateAgreement (address _partner, uint _agreementAmount, uint _maxFulfilmentDays) public {
+    function initiateAgreement (address _partner, uint _agreementAmount, uint _maxFulfilmentDays) public returns(uint256) {
         count ++;
 
         agreements[count] = Agreement({ initiator: msg.sender, 
@@ -49,7 +75,8 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
                                     maxFulfilmentDays: block.timestamp + _maxFulfilmentDays * 1 days, 
                                     agreementPartnerSigned: false, 
                                     agreementState: State.NOT_SIGNED
-                                  });
+                                });
+        return count;
     }
 
     // Each of the 2 parties will call this function to sign
