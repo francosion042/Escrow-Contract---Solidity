@@ -39,6 +39,12 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
             address indexed partner
         );
 
+    event AgreementAmountWithdrawn(
+            uint256 indexed agreementId,
+            uint256 agreementAmount,
+            address indexed partner
+        );
+
     // Structs
     struct Agreement {
         address initiator;
@@ -69,13 +75,22 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
     function initiateAgreement (address _partner, uint _agreementAmount, uint _maxFulfilmentDays) public returns(uint256) {
         count ++;
 
-        agreements[count] = Agreement({ initiator: msg.sender, 
-                                    partner: _partner, 
-                                    agreementAmount: _agreementAmount, 
-                                    maxFulfilmentDays: block.timestamp + _maxFulfilmentDays * 1 days, 
-                                    agreementPartnerSigned: false, 
-                                    agreementState: State.NOT_SIGNED
-                                });
+        agreements[count] = Agreement({ 
+            initiator: msg.sender, 
+            partner: _partner, 
+            agreementAmount: _agreementAmount, 
+            maxFulfilmentDays: block.timestamp + _maxFulfilmentDays * 1 days, 
+            agreementPartnerSigned: false, 
+            agreementState: State.NOT_SIGNED
+        });
+        emit AgreementInitated(
+            count, 
+            msg.sender, 
+            _partner,
+            _agreementAmount, 
+            block.timestamp + _maxFulfilmentDays * 1 days
+        );
+        
         return count;
     }
 
@@ -86,6 +101,11 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
         agreements[_agreementId].agreementPartnerSigned = true;
 
         agreements[_agreementId].agreementState == State.AWAITING_PAYMENT;
+
+        emit AgreementSigned(
+            _agreementId, 
+            msg.sender
+        );
     }
 
     // the partner can make payment
@@ -94,6 +114,12 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
         require(msg.value == agreements[_agreementId].agreementAmount, "Pay the Agreed Amount");
 
         agreements[_agreementId].agreementState = State.AWAITING_CONFIRMATION;
+
+        emit AgreementAmountDeposited(
+            _agreementId, 
+            msg.value, 
+            msg.sender
+        );
     }
 
     // the partner confirms that they've received the stuff, and that completes the agreement
@@ -104,6 +130,11 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
         // transfer the money to the seller
         payable(agreements[_agreementId].initiator).transfer(agreements[_agreementId].agreementAmount);
+
+        emit AgreementTransactionConfirmed(
+            _agreementId, 
+            msg.sender
+        );
     }
 
     // if the partner didn't get the stuff at the end of the delivery period, they can withdraw their money
@@ -114,6 +145,12 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
         agreements[_agreementId].agreementState = State.CANCELLED;
 
         payable(agreements[_agreementId].partner).transfer(agreements[_agreementId].agreementAmount);
+
+        emit AgreementAmountWithdrawn(
+            _agreementId, 
+            agreements[_agreementId].agreementAmount, 
+            msg.sender
+        );
 
     }
  }
