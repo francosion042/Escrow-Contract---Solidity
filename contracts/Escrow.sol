@@ -26,6 +26,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
     }
 
     // Variables
+    uint256 count = 0;
     mapping (uint256 => Agreement) public agreements;
 
     // modifiers
@@ -40,7 +41,9 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function initiateAgreement (address _partner, uint _agreementAmount, uint _maxFulfilmentDays) public {
-        agreements[1] = Agreement({ initiator: msg.sender, 
+        count ++;
+
+        agreements[count] = Agreement({ initiator: msg.sender, 
                                     partner: _partner, 
                                     agreementAmount: _agreementAmount, 
                                     maxFulfilmentDays: block.timestamp + _maxFulfilmentDays * 1 days, 
@@ -76,14 +79,14 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
         payable(agreements[_agreementId].initiator).transfer(agreements[_agreementId].agreementAmount);
     }
 
-    // // if the partner didn't get the stuff at the end of the delivery period, they can withdraw their money
-    // function withdraw (uint256 _agreementId) public payable onlyPartner(_agreementId) {
-    //     require(block.timestamp > deliveryDays, "you cannot End the Agreement within delivery period");
-    //     require(agreementState == State.AWAITING_DELIVERY, "Withdrawal Not Allowed");
+    // if the partner didn't get the stuff at the end of the delivery period, they can withdraw their money
+    function withdraw (uint256 _agreementId) public payable onlyPartner(_agreementId) {
+        require(block.timestamp > agreements[_agreementId].maxFulfilmentDays, "you cannot End the Agreement before its max fulfilment period");
+        require(agreements[_agreementId].agreementState == State.AWAITING_CONFIRMATION, "Withdrawal Not Allowed");
 
-    //     agreementState = State.CANCELED;
+        agreements[_agreementId].agreementState = State.CANCELLED;
 
-    //     payable(partner).transfer(agreementAmount);
+        payable(agreements[_agreementId].partner).transfer(agreements[_agreementId].agreementAmount);
 
-    // }
+    }
  }
