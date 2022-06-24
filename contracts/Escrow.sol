@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
  */
 
  contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
-    enum State {NOT_STARTED, AWAITING_PAYMENT, AWAITING_DELIVERY, COMPLETED, CANCELED}
+    enum State {NOT_SIGNED, AWAITING_PAYMENT, AWAITING_CONFIRMATION, COMPLETED, CANCELLED}
 
     // Structs
     struct Agreement {
@@ -45,38 +45,36 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
                                     agreementAmount: _agreementAmount, 
                                     maxFulfilmentDays: block.timestamp + _maxFulfilmentDays * 1 days, 
                                     agreementPartnerSigned: false, 
-                                    agreementState: State.NOT_STARTED
+                                    agreementState: State.NOT_SIGNED
                                   });
     }
 
     // Each of the 2 parties will call this function to sign
-    // function signAgreement() public {
-    //     require(agreementState == State.NOT_STARTED);
-    //     // the caller confirms he's in
-    //     agreementApproval[msg.sender] = true;
+    function signAgreement(uint256 _agreementId) public onlyPartner(_agreementId) {
+        require(agreements[_agreementId].agreementState == State.NOT_SIGNED);
+        // the caller confirms he's in
+        agreements[_agreementId].agreementPartnerSigned = true;
 
-    //     if (agreementApproval[seller] && agreementApproval[partner]) {
-    //         agreementState = State.AWAITING_PAYMENT;
-    //     }
-    // }
+        agreements[_agreementId].agreementState == State.AWAITING_PAYMENT;
+    }
 
-    // // the partner can make payment
-    // function deposit (uint256 _agreementId) public payable onlyPartner(_agreementId) {
-    //     require(agreementState == State.AWAITING_PAYMENT, "You have already paid");
-    //     require(msg.value == agreementAmount, "Pay the Agreed Amount");
+    // the partner can make payment
+    function deposit (uint256 _agreementId) public payable onlyPartner(_agreementId) {
+        require(agreements[_agreementId].agreementState == State.AWAITING_PAYMENT, "You have already paid");
+        require(msg.value == agreements[_agreementId].agreementAmount, "Pay the Agreed Amount");
 
-    //     agreementState = State.AWAITING_DELIVERY;
-    // }
+        agreements[_agreementId].agreementState = State.AWAITING_CONFIRMATION;
+    }
 
-    // // the partner confirms that they've received the stuff, and that completes the agreement
-    // function confirmDelivery (uint256 _agreementId) public onlyPartner(_agreementId) {
-    //     require(agreementState == State.AWAITING_DELIVERY, "You Have not Made Payment");
+    // the partner confirms that they've received the stuff, and that completes the agreement
+    function confirm (uint256 _agreementId) public onlyPartner(_agreementId) {
+        require(agreements[_agreementId].agreementState == State.AWAITING_CONFIRMATION, "You Have not Made Payment");
 
-    //      agreementState = State.COMPLETED;
+         agreements[_agreementId].agreementState = State.COMPLETED;
 
-    //     // transfer the money to the seller
-    //     seller.transfer(agreementAmount);
-    // }
+        // transfer the money to the seller
+        payable(agreements[_agreementId].initiator).transfer(agreements[_agreementId].agreementAmount);
+    }
 
     // // if the partner didn't get the stuff at the end of the delivery period, they can withdraw their money
     // function withdraw (uint256 _agreementId) public payable onlyPartner(_agreementId) {
