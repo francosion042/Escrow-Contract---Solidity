@@ -96,6 +96,10 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         return count;
     }
 
+    function getAgreement (uint256 _agreementId) public view returns(Agreement memory) {
+        return agreements[_agreementId];
+    }
+
     // Each of the 2 parties will call this function to sign
     function signAgreement(uint256 _agreementId) public onlyPartner(_agreementId) {
         require(agreements[_agreementId].agreementState == State.NOT_SIGNED);
