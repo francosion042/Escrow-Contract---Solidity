@@ -6,13 +6,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
+
 /** 
  * @title Escrow
  * @dev Implements an Escrow system for a 2 member Agreement
  * @dev the contract is deployed and supplied with the address of the seller, partner, the amount and the time period for delivery
  */
 
- contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
+contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     enum State {NOT_SIGNED, AWAITING_PAYMENT, AWAITING_CONFIRMATION, COMPLETED, CANCELLED}
 
     // Events
@@ -56,7 +57,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
     }
 
     // Variables
-    uint256 count = 0;
+    uint256 count;
     mapping (uint256 => Agreement) public agreements;
 
     // Modifiers
@@ -68,6 +69,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
     // Functions
     function initialize () public initializer {
         __Ownable_init();
+        count = 0;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
