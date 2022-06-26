@@ -2,24 +2,22 @@ const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
 
 const state = {
-  EscrowContract: null,
-  EscrowProxy: null,
+  Escrow: null,
   accounts: {
     initiator: "",
     partner: "",
-  }
+  },
 };
 
 const initialize = async () => {
-  state.EscrowContract = await ethers.getContractFactory("Escrow");
-  const escrow = await upgrades.deployProxy(state.EscrowContract, {
+  const Contract = await ethers.getContractFactory("Escrow");
+  const escrow = await upgrades.deployProxy(Contract, {
     kind: "uups",
     initializer: "initialize",
   });
   await escrow.deployed();
 
-  state.EscrowProxy = escrow;
-
+  state.Escrow = escrow;
 };
 
 before(async () => {
@@ -31,36 +29,39 @@ before(async () => {
 
 describe("Escrow", function () {
   it("Should confirm contract deployment", async () => {
-    await expect(state.EscrowProxy.address).to.be.a("string");
+    await expect(state.Escrow.address).to.be.a("string");
   });
 
   it("should initiate an agreement", async () => {
-    const Escrow = await state.EscrowContract.attach(state.EscrowProxy.address);
-
-    // console.log(state.accounts.partner)
-  
     await expect(
-      await Escrow.initiateAgreement(
+      state.Escrow.initiateAgreement(
         state.accounts.partner,
         ethers.utils.parseEther("1"),
         5
       )
-    )
-      .to.emit(Escrow, "AgreementInitiated")
-      .withArgs(
-        state.accounts.initiator,
+    ).to.emit(state.Escrow, "AgreementInitiated");
+  });
+
+  it("should get an agreement", async () => {
+
+    const agreement = await expect(
+      state.Escrow.initiateAgreement(
         state.accounts.partner,
         ethers.utils.parseEther("1"),
         5
+      ))
+
+      console.log(agreement)
+
+    await expect(await state.Escrow.getAgreement(1))
+      .to.be.an("array")
+      .which.contains(
+        state.accounts.initiator,
+        state.accounts.partner,
+        ethers.utils.parseEther("1"),
+        ethers.BigNumber.from(5),
+        false,
+        0
       );
   });
-
-  // it("should get an agreement", async () => {
-  //   const Escrow = await state.EscrowContract.attach(state.EscrowProxy.address);
-
-  //   await expect(
-  //     await Escrow.getAgreement(1)
-  //   )
-  //   .to.returned()
-  // })
 });

@@ -17,7 +17,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     enum State {NOT_SIGNED, AWAITING_PAYMENT, AWAITING_CONFIRMATION, COMPLETED, CANCELLED}
 
     // Events
-    event AgreementInitated(
+    event AgreementInitiated(
             uint256 indexed agreementId, 
             address indexed initiator, 
             address indexed partner,
@@ -85,7 +85,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
             agreementPartnerSigned: false, 
             agreementState: State.NOT_SIGNED
         });
-        emit AgreementInitated(
+        emit AgreementInitiated(
             count, 
             msg.sender, 
             _partner,
