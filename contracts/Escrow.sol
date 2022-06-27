@@ -74,7 +74,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-    function initiateAgreement (address _partner, uint _agreementAmount, uint _maxFulfilmentDays) public returns(uint256) {
+    function initiateAgreement (address _partner, uint _agreementAmount, uint _maxFulfilmentDays) public returns(Agreement memory) {
         count ++;
 
         agreements[count] = Agreement({ 
@@ -93,7 +93,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
             block.timestamp + _maxFulfilmentDays * 1 days
         );
         
-        return count;
+        return agreements[count];
     }
 
     function getAgreement (uint256 _agreementId) public view returns(Agreement memory) {
@@ -106,7 +106,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         // the caller confirms he's in
         agreements[_agreementId].agreementPartnerSigned = true;
 
-        agreements[_agreementId].agreementState == State.AWAITING_PAYMENT;
+        agreements[_agreementId].agreementState = State.AWAITING_PAYMENT;
 
         emit AgreementSigned(
             _agreementId, 

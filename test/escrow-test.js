@@ -23,8 +23,8 @@ const initialize = async () => {
 before(async () => {
   await initialize();
   const [inititor, partner] = await ethers.getSigners();
-  state.accounts.initiator = inititor.address;
-  state.accounts.partner = partner.address;
+  state.accounts.initiator = inititor;
+  state.accounts.partner = partner;
 });
 
 describe("Escrow", function () {
@@ -35,7 +35,7 @@ describe("Escrow", function () {
   it("should initiate an agreement", async () => {
     await expect(
       state.Escrow.initiateAgreement(
-        state.accounts.partner,
+        state.accounts.partner.address,
         ethers.utils.parseEther("1"),
         5
       )
@@ -43,25 +43,30 @@ describe("Escrow", function () {
   });
 
   it("should get an agreement", async () => {
-
-    const agreement = await expect(
-      state.Escrow.initiateAgreement(
-        state.accounts.partner,
-        ethers.utils.parseEther("1"),
-        5
-      ))
-
-      console.log(agreement)
-
     await expect(await state.Escrow.getAgreement(1))
       .to.be.an("array")
       .which.contains(
-        state.accounts.initiator,
-        state.accounts.partner,
+        state.accounts.initiator.address,
+        state.accounts.partner.address,
         ethers.utils.parseEther("1"),
         ethers.BigNumber.from(5),
         false,
         0
       );
   });
+
+  it("partner should sign agreement", async () => {
+    await expect(
+      state.Escrow.connect(state.accounts.partner).signAgreement(1)
+    ).to.emit(state.Escrow, "AgreementSigned");
+  })
+
+  it("partner should deposit agreement amount", async () => {
+    const agreement  = await state.Escrow.getAgreement(1)
+
+    const options = { value: ethers.utils.parseEther(ethers.utils.formatEther(agreement.agreementAmount)) };
+    await expect(
+      state.Escrow.connect(state.accounts.partner).deposit(1, options)
+    ).to.emit(state.Escrow, "AgreementAmountDeposited");
+  })
 });
