@@ -69,4 +69,10 @@ describe("Escrow", function () {
       state.Escrow.connect(state.accounts.partner).deposit(1, options)
     ).to.emit(state.Escrow, "AgreementAmountDeposited");
   })
+
+  it("partner should confirm agreement fulfilment", async () => {
+    await expect(
+      state.Escrow.connect(state.accounts.partner).confirmFulfilment(1)
+    ).to.emit(state.Escrow, "AgreementFulfilmentConfirmed");
+  })
 });

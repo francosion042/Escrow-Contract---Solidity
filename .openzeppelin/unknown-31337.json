@@ -3,14 +3,14 @@
   "proxies": [
     {
       "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-      "txHash": "0x010a9f63fbccb908448e637e15bb2a696bdc2e586d441a6d229cf24f2417991b",
+      "txHash": "0x1d1c93ca65b58fb8a6fd2e80be85635e519aa9628ab614117933cb80367e1722",
       "kind": "uups"
     }
   ],
   "impls": {
-    "f23b9f12e1228018c0f7a36cc1ee52fca82da3250ba4c7e627ba09e50f205996": {
+    "cac958c932d6f09bd473ae0f940022015f275c14cfc68cdc8089c686995acfdd": {
       "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-      "txHash": "0x22ca9082ab59cbe92347e235d34bd0ce1824230284b9d51681d511713a78040e",
+      "txHash": "0x9eda6f051d7b8024701b5d560d74deafa583323186f438bfb068f0948166e7ef",
       "layout": {
         "storage": [
           {
@@ -76,15 +76,15 @@
             "slot": "201",
             "type": "t_uint256",
             "contract": "Escrow",
-            "src": "contracts/Escrow.sol:60"
+            "src": "contracts/Escrow.sol:61"
           },
           {
             "label": "agreements",
             "offset": 0,
             "slot": "202",
-            "type": "t_mapping(t_uint256,t_struct(Agreement)1208_storage)",
+            "type": "t_mapping(t_uint256,t_struct(Agreement)1210_storage)",
             "contract": "Escrow",
-            "src": "contracts/Escrow.sol:61"
+            "src": "contracts/Escrow.sol:62"
           }
         ],
         "types": {
@@ -115,51 +115,57 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_mapping(t_uint256,t_struct(Agreement)1208_storage)": {
+          "t_mapping(t_uint256,t_struct(Agreement)1210_storage)": {
             "label": "mapping(uint256 => struct Escrow.Agreement)",
             "numberOfBytes": "32"
           },
-          "t_struct(Agreement)1208_storage": {
+          "t_struct(Agreement)1210_storage": {
             "label": "struct Escrow.Agreement",
             "members": [
               {
-                "label": "initiator",
-                "type": "t_address",
+                "label": "agreementId",
+                "type": "t_uint256",
                 "offset": 0,
                 "slot": "0"
               },
               {
-                "label": "partner",
+                "label": "initiator",
                 "type": "t_address",
                 "offset": 0,
                 "slot": "1"
               },
               {
-                "label": "agreementAmount",
-                "type": "t_uint256",
+                "label": "partner",
+                "type": "t_address",
                 "offset": 0,
                 "slot": "2"
               },
               {
-                "label": "maxFulfilmentDays",
+                "label": "agreementAmount",
                 "type": "t_uint256",
                 "offset": 0,
                 "slot": "3"
               },
               {
+                "label": "maxFulfilmentDays",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
                 "label": "agreementPartnerSigned",
                 "type": "t_bool",
                 "offset": 0,
-                "slot": "4"
+                "slot": "5"
               },
               {
                 "label": "agreementState",
                 "type": "t_enum(State)1154",
                 "offset": 1,
-                "slot": "4"
+                "slot": "5"
               }
             ],
-            "numberOfBytes": "160"
+            "numberOfBytes": "192"
           },
           "t_uint256": {
             "label": "uint256",

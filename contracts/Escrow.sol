@@ -35,7 +35,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
             address indexed partner
         );
 
-    event AgreementTransactionConfirmed(
+    event AgreementFulfilmentConfirmed(
             uint256 indexed agreementId,
             address indexed partner
         );
@@ -48,6 +48,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 
     // Structs
     struct Agreement {
+        uint256 agreementId;
         address initiator;
         address partner;
         uint256 agreementAmount;
@@ -78,6 +79,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         count ++;
 
         agreements[count] = Agreement({ 
+            agreementId: count,
             initiator: msg.sender, 
             partner: _partner, 
             agreementAmount: _agreementAmount, 
@@ -129,7 +131,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     }
 
     // the partner confirms that they've received the stuff, and that completes the agreement
-    function confirm (uint256 _agreementId) public onlyPartner(_agreementId) {
+    function confirmFulfilment (uint256 _agreementId) public onlyPartner(_agreementId) {
         require(agreements[_agreementId].agreementState == State.AWAITING_CONFIRMATION, "You Have not Made Payment");
 
          agreements[_agreementId].agreementState = State.COMPLETED;
@@ -137,7 +139,7 @@ contract Escrow is Initializable, UUPSUpgradeable, OwnableUpgradeable {
         // transfer the money to the seller
         payable(agreements[_agreementId].initiator).transfer(agreements[_agreementId].agreementAmount);
 
-        emit AgreementTransactionConfirmed(
+        emit AgreementFulfilmentConfirmed(
             _agreementId, 
             msg.sender
         );
